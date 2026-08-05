@@ -1,0 +1,13 @@
+[project]
+name = "applyforge-backend"
+version = "0.1.0"
+description = "ApplyForge backend — AI-powered job application toolkit API"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.141.1",
+    "pdfplumber>=0.11.10",
+    "pydantic-settings>=2.14.2",
+    "python-multipart>=0.0.32",
+    "uvicorn[standard]>=0.52.1",
+]

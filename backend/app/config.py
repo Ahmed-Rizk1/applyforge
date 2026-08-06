@@ -14,6 +14,8 @@ class Settings(BaseSettings):
 
     # Rate limiting
     rate_limit_per_day: int = 10
+    rate_limit_requests: int = 10
+    rate_limit_window_seconds: int = 3600
 
     # Environment
     environment: str = "development"

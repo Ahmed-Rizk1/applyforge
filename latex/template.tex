@@ -1,0 +1,73 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.6in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+% Colors
+\definecolor{primary}{RGB}{30, 41, 59}
+\definecolor{secondary}{RGB}{71, 85, 105}
+\definecolor{accent}{RGB}{212, 168, 67}
+\definecolor{linkcolor}{RGB}{37, 99, 235}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=linkcolor,
+    urlcolor=linkcolor
+}
+
+% Page setup & fonts
+\pagestyle{empty}
+\urlstyle{same}
+
+% Section title formatting
+\titleformat{\section}
+  {\Large\bfseries\color{primary}\raggedright}
+  {}{0em}
+  {}
+  [\color{accent}\titlerule]
+
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+
+% Custom list formatting
+\setlist[itemize]{leftmargin=1.2em, itemsep=2pt, parsep=0pt, topsep=2pt}
+
+\begin{document}
+
+% ── HEADER ──
+\begin{center}
+    {\Huge \bfseries \color{primary} __NAME__} \\[4pt]
+    {\color{secondary} \small __CONTACT_LINE__}
+\end{center}
+
+\vspace{-4pt}
+
+% ── SUMMARY ──
+\section*{PROFESSIONAL SUMMARY}
+\color{primary}
+__SUMMARY__
+
+% ── WORK EXPERIENCE ──
+\section*{WORK EXPERIENCE}
+__WORK_EXPERIENCE__
+
+% ── EDUCATION ──
+\section*{EDUCATION}
+__EDUCATION__
+
+% ── PROJECTS ──
+\section*{PROJECTS}
+__PROJECTS__
+
+% ── SKILLS & QUALIFICATIONS ──
+\section*{SKILLS \& CERTIFICATIONS}
+\begin{itemize}[leftmargin=0pt, label={}]
+    \item \textbf{Technical Skills:} __SKILLS__
+    \item \textbf{Certifications:} __CERTIFICATIONS__
+    \item \textbf{Languages:} __LANGUAGES__
+\end{itemize}
+
+\end{document}

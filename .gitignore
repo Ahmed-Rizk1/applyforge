@@ -52,3 +52,7 @@ backend/dist/
 htmlcov/
 .coverage
 coverage.xml
+
+# Executables & Archives
+*.zip
+*.exe

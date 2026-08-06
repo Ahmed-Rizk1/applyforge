@@ -2,13 +2,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.middleware.rate_limit import RateLimitMiddleware
 from app.routes.upload import router as upload_router
+from app.routes.profile import router as profile_router
+from app.routes.generate import router as generate_router
 
 app = FastAPI(
     title="ApplyForge API",
     description="AI-powered, JD-tailored job application toolkit",
     version="0.1.0",
 )
+
+app.add_middleware(RateLimitMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,6 +24,8 @@ app.add_middleware(
 )
 
 app.include_router(upload_router, prefix="/api")
+app.include_router(profile_router, prefix="/api")
+app.include_router(generate_router, prefix="/api")
 
 
 @app.get("/api/health")

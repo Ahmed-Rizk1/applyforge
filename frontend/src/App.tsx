@@ -41,10 +41,17 @@ function App() {
   const [customApiKey, setCustomApiKey] = useState<string>(() => localStorage.getItem('applyforge_groq_key') || '')
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false)
 
-  // Attach X-Groq-Api-Key to all fetch requests automatically
+  // Attach X-Groq-Api-Key to all fetch requests & support VITE_API_URL override
   useEffect(() => {
     const originalFetch = window.fetch
+    const customApiBase = import.meta.env.VITE_API_URL || ''
+
     window.fetch = async (input, init) => {
+      let targetInput = input
+      if (customApiBase && typeof input === 'string' && input.startsWith('/api')) {
+        targetInput = `${customApiBase.replace(/\/$/, '')}${input}`
+      }
+
       const savedKey = localStorage.getItem('applyforge_groq_key')
       if (savedKey && savedKey.trim()) {
         init = init || {}
@@ -54,7 +61,7 @@ function App() {
         }
         init.headers = headers
       }
-      return originalFetch(input, init)
+      return originalFetch(targetInput, init)
     }
     return () => {
       window.fetch = originalFetch

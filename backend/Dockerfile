@@ -1,5 +1,5 @@
 # Multi-stage Dockerfile for FastAPI + Tectonic LaTeX compiler
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Install curl & tectonic
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -12,7 +12,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN pip install uv && uv sync --frozen --no-cache
 
-FROM python:3.11-slim as runner
+FROM python:3.11-slim AS runner
 WORKDIR /app
 
 # Copy tectonic binary from builder

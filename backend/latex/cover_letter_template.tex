@@ -1,0 +1,35 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\definecolor{primary}{RGB}{30, 41, 59}
+\definecolor{secondary}{RGB}{71, 85, 105}
+\definecolor{accent}{RGB}{212, 168, 67}
+
+\pagestyle{empty}
+
+\begin{document}
+
+% ── HEADER ──
+\begin{center}
+    {\Huge \bfseries \color{primary} __NAME__} \\[4pt]
+    {\color{secondary} \small __CONTACT_LINE__}
+\end{center}
+
+\vspace{10pt}
+\hrule height 1pt
+\vspace{15pt}
+
+% ── DATE ──
+\hfill {\color{secondary} __DATE__}
+
+\vspace{15pt}
+
+% ── CONTENT ──
+\color{primary}
+__CONTENT__
+
+\end{document}

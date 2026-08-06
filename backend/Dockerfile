@@ -1,5 +1,10 @@
 # Multi-stage Dockerfile for FastAPI + Tectonic LaTeX compiler
-FROM python:3.11-slim AS builder
+FROM python:3.13-slim AS builder
+
+# Force uv to use system Python and copy binaries (prevents dangling symlinks)
+ENV UV_PYTHON_PREFERENCE=only-system \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1
 
 # Install curl, ca-certificates, tar & tectonic binary directly from GitHub release
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,8 +19,15 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN pip install uv && uv sync --frozen --no-cache
 
-FROM python:3.11-slim AS runner
+FROM python:3.13-slim AS runner
 WORKDIR /app
+
+# Install runtime dependencies for Tectonic PDF compilation & network requests
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    fontconfig \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy tectonic binary from builder
 COPY --from=builder /usr/local/bin/tectonic /usr/local/bin/tectonic
@@ -28,4 +40,5 @@ COPY latex /app/latex
 ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 
-CMD ["sh", "-c", "/app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+

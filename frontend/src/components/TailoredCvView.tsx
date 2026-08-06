@@ -82,6 +82,19 @@ export function TailoredCvView({ profile, jobDescription }: Props) {
     }
   }
 
+  const [copySuccess, setCopySuccess] = useState(false)
+
+  async function handleCopyTex() {
+    if (!texSource) return
+    try {
+      await navigator.clipboard.writeText(texSource)
+      setCopySuccess(true)
+      setTimeout(() => setCopySuccess(false), 2000)
+    } catch {
+      // fallback
+    }
+  }
+
   function handleDownloadTex() {
     if (!texSource) return
     const blob = new Blob([texSource], { type: 'text/x-tex;charset=utf-8' })
@@ -153,6 +166,13 @@ export function TailoredCvView({ profile, jobDescription }: Props) {
               </div>
 
               <div className="btn-group">
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--small"
+                  onClick={handleCopyTex}
+                >
+                  {copySuccess ? '✓ Copied LaTeX!' : '📋 Copy LaTeX Code'}
+                </button>
                 <button
                   type="button"
                   className="btn btn--ghost btn--small"

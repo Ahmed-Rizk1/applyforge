@@ -34,6 +34,7 @@ interface Props {
 
 type FeatureTab = 'match-score' | 'tailored-cv' | 'cover-letter' | 'outreach-email' | 'linkedin-dm' | 'interview-questions' | 'salary-estimate'
 
+
 const CURRENCY_RATES: Record<string, { symbol: string; label: string; rate: number }> = {
   USD: { symbol: '$', label: '💵 USD', rate: 1.0 },
   EUR: { symbol: '€', label: '💶 EUR', rate: 0.92 },

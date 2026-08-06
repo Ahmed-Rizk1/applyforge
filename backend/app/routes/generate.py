@@ -9,6 +9,8 @@ from app.models.generate import (
     CompilePdfRequest,
     SalaryEstimateResponse,
     CoverLetterPdfRequest,
+    ChatRequest,
+    ChatResponse,
 )
 from app.services.match_score import generate_match_score
 from app.services.text_generation import (
@@ -21,6 +23,7 @@ from app.services.latex_builder import build_tailored_cv
 from app.services.latex_compiler import compile_tex_to_pdf
 from app.services.salary_estimator import generate_salary_estimate
 from app.services.cover_letter_pdf import build_cover_letter_pdf
+from app.services.chat_copilot import generate_chat_reply
 
 logger = logging.getLogger(__name__)
 
@@ -186,3 +189,24 @@ def get_cover_letter_pdf(payload: CoverLetterPdfRequest):
             status_code=500,
             detail=f"Cover Letter PDF compilation failed: {str(exc)}"
         ) from exc
+
+
+@router.post("/generate/chat", response_model=ChatResponse)
+def chat_copilot(payload: ChatRequest):
+    """Interactive multi-turn chatbot response grounded in candidate profile and job description."""
+    if not payload.messages:
+        raise HTTPException(
+            status_code=422,
+            detail="Chat history cannot be empty."
+        )
+    try:
+        return generate_chat_reply(payload)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(f"Error in chat copilot: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Chatbot failed: {str(exc)}"
+        ) from exc
+

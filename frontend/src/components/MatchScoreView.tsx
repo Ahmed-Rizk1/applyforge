@@ -28,10 +28,25 @@ Requirements & Qualifications:
 
 interface Props {
   profile: StructuredProfile
+  jobDescription?: string
+  onJobDescriptionChange?: (jd: string) => void
+  onOpenChatbot?: () => void
 }
 
-export function MatchScoreView({ profile }: Props) {
-  const [jobDescription, setJobDescription] = useState('')
+export function MatchScoreView({
+  profile,
+  jobDescription: externalJd,
+  onJobDescriptionChange,
+  onOpenChatbot,
+}: Props) {
+  const [internalJd, setInternalJd] = useState('')
+  const jobDescription = externalJd !== undefined ? externalJd : internalJd
+
+  const setJobDescription = (val: string) => {
+    if (onJobDescriptionChange) onJobDescriptionChange(val)
+    else setInternalJd(val)
+  }
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isRateLimited, setIsRateLimited] = useState(false)
@@ -94,6 +109,15 @@ export function MatchScoreView({ profile }: Props) {
             Target Job Description (JD)
           </label>
           <div className="btn-group">
+            {onOpenChatbot && (
+              <button
+                type="button"
+                className="btn btn--ghost btn--small text-accent"
+                onClick={onOpenChatbot}
+              >
+                💬 Open Form Chatbot
+              </button>
+            )}
             <button
               type="button"
               className="btn btn--ghost btn--small"

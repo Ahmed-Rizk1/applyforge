@@ -4,12 +4,13 @@ import './App.css'
 import { ProfileEditor } from './components/ProfileEditor'
 import type { StructuredProfile } from './components/ProfileEditor'
 import { MatchScoreView } from './components/MatchScoreView'
+import { ChatbotView } from './components/ChatbotView'
 
 type UploadStatus = 'idle' | 'uploading' | 'error'
 type ParseStatus = 'idle' | 'parsing' | 'error'
 type InputMode = 'pdf' | 'text'
 
-const STEPS = ['Provide CV', 'Review Profile', 'Paste JD', 'Generate']
+const STEPS = ['Provide CV', 'Review Profile', 'Paste JD', 'Form Chatbot']
 
 function App() {
   // Input Mode state ('pdf' upload or 'text' / latex input)
@@ -29,9 +30,11 @@ function App() {
   const [parseError, setParseError] = useState<string>('')
   const [parsedProfile, setParsedProfile] = useState<StructuredProfile | null>(null)
 
-  // Step 2+ State: Confirmed Profile
+  // Step 2+ State: Confirmed Profile & Job Description
   const [confirmedProfile, setConfirmedProfile] = useState<StructuredProfile | null>(null)
   const [isProfileConfirmed, setIsProfileConfirmed] = useState(false)
+  const [jobDescription, setJobDescription] = useState<string>('')
+  const [activeStepOverride, setActiveStepOverride] = useState<number | null>(null)
 
   // PDF Upload handler
   async function handleUpload(file: File) {
@@ -40,6 +43,7 @@ function App() {
     setRawText('')
     setParsedProfile(null)
     setIsProfileConfirmed(false)
+    setActiveStepOverride(null)
 
     const formData = new FormData()
     formData.append('file', file)
@@ -70,6 +74,7 @@ function App() {
     setRawText(trimmed)
     setFilename('Text / LaTeX Source')
     setIsProfileConfirmed(false)
+    setActiveStepOverride(null)
     triggerParseProfile(trimmed)
   }
 
@@ -121,15 +126,27 @@ function App() {
     setParsedProfile(null)
     setConfirmedProfile(null)
     setIsProfileConfirmed(false)
+    setJobDescription('')
+    setActiveStepOverride(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  // Determine current active step index (0: Upload/Provide CV, 1: Review Profile, 2: Paste JD, 3: Generate)
-  let currentStep = 0
+  // Calculate default auto step index
+  let autoStep = 0
   if (isProfileConfirmed) {
-    currentStep = 2
+    autoStep = 2
   } else if (parsedProfile || parseStatus === 'parsing' || parseStatus === 'error' || rawText) {
-    currentStep = 1
+    autoStep = 1
+  }
+
+  // Effective step user is currently viewing
+  const currentStep = activeStepOverride !== null ? activeStepOverride : autoStep
+
+  function canNavigateToStep(stepIdx: number): boolean {
+    if (stepIdx === 0) return true
+    if (stepIdx === 1) return Boolean(parsedProfile || rawText || parseStatus === 'parsing')
+    if (stepIdx === 2 || stepIdx === 3) return isProfileConfirmed
+    return false
   }
 
   return (
@@ -142,22 +159,28 @@ function App() {
         </div>
 
         <nav className="step-nav">
-          {STEPS.map((label, i) => (
-            <div
-              key={label}
-              className={[
-                'step-item',
-                i === currentStep ? 'step-item--active' : '',
-                i < currentStep ? 'step-item--done' : '',
-                i > currentStep ? 'step-item--locked' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <span className="step-num">{i < currentStep ? '✓' : String(i + 1).padStart(2, '0')}</span>
-              <span className="step-label">{label}</span>
-            </div>
-          ))}
+          {STEPS.map((label, i) => {
+            const unlocked = canNavigateToStep(i)
+            return (
+              <div
+                key={label}
+                className={[
+                  'step-item',
+                  i === currentStep ? 'step-item--active' : '',
+                  i < currentStep ? 'step-item--done' : '',
+                  unlocked ? 'step-item--clickable' : 'step-item--locked',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={() => {
+                  if (unlocked) setActiveStepOverride(i)
+                }}
+              >
+                <span className="step-num">{i < currentStep ? '✓' : String(i + 1).padStart(2, '0')}</span>
+                <span className="step-label">{label}</span>
+              </div>
+            )
+          })}
         </nav>
 
         <div className="sidebar-footer">
@@ -342,7 +365,7 @@ function App() {
           </div>
         )}
 
-        {/* Step 2+: Confirmed Profile Ready */}
+        {/* Step 2 or 3: Confirmed Profile Ready */}
         {isProfileConfirmed && confirmedProfile && (
           <div className="step-container">
             <div className="confirmed-banner">
@@ -355,17 +378,34 @@ function App() {
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                className="btn btn--ghost btn--small"
-                onClick={() => setIsProfileConfirmed(false)}
-              >
-                ✏️ Edit Profile
-              </button>
+              <div className="btn-group">
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--small"
+                  onClick={() => setIsProfileConfirmed(false)}
+                >
+                  ✏️ Edit Profile
+                </button>
+              </div>
             </div>
 
-            {/* Stage 3 Active Match Score View */}
-            <MatchScoreView profile={confirmedProfile} />
+            {/* Step 2 (Paste JD & Application Suite) */}
+            {currentStep === 2 && (
+              <MatchScoreView
+                profile={confirmedProfile}
+                jobDescription={jobDescription}
+                onJobDescriptionChange={setJobDescription}
+                onOpenChatbot={() => setActiveStepOverride(3)}
+              />
+            )}
+
+            {/* Step 3 (Form Chatbot — Dedicated Full Page) */}
+            {currentStep === 3 && (
+              <ChatbotView
+                profile={confirmedProfile}
+                jobDescription={jobDescription}
+              />
+            )}
           </div>
         )}
       </main>

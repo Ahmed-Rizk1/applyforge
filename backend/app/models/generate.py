@@ -161,4 +161,43 @@ class CoverLetterPdfRequest(BaseModel):
         return str(v)
 
 
+class ChatMessage(BaseModel):
+    role: str  # "user" or "assistant"
+    content: str
+
+    @field_validator("role", "content", mode="before")
+    @classmethod
+    def coerce_str(cls, v: Any) -> str:
+        if v is None:
+            return ""
+        return str(v).strip()
+
+
+class ChatRequest(BaseModel):
+    profile: StructuredProfile
+    job_description: str
+    messages: List[ChatMessage] = Field(default_factory=list)
+    detail_level: str = "standard"  # "concise", "standard", "detailed"
+    tone_mode: str = "professional"  # "professional", "conversational", "enthusiastic_persuasive", "bold_impact", "star_storyteller"
+
+    @field_validator("job_description", mode="before")
+    @classmethod
+    def check_jd(cls, v: Any) -> str:
+        if v is None:
+            return ""
+        return str(v)
+
+
+class ChatResponse(BaseModel):
+    reply: str = ""
+
+    @field_validator("reply", mode="before")
+    @classmethod
+    def coerce_reply(cls, v: Any) -> str:
+        if v is None:
+            return ""
+        return str(v).strip()
+
+
+
 

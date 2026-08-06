@@ -5,10 +5,12 @@ from app.models.generate import MatchScoreResponse
 from app.prompts.match_score import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
 from app.services.llm import call_groq_json
 
+from typing import Optional
+
 logger = logging.getLogger(__name__)
 
 
-def generate_match_score(profile: StructuredProfile, job_description: str) -> MatchScoreResponse:
+def generate_match_score(profile: StructuredProfile, job_description: str, custom_api_key: Optional[str] = None) -> MatchScoreResponse:
     """Analyze profile against job description and generate match score metrics."""
     profile_json_str = json.dumps(profile.model_dump(), ensure_ascii=False)
     user_prompt = USER_PROMPT_TEMPLATE.format(
@@ -16,7 +18,7 @@ def generate_match_score(profile: StructuredProfile, job_description: str) -> Ma
         job_description=job_description.strip()
     )
 
-    raw_json = call_groq_json(system_prompt=SYSTEM_PROMPT, user_prompt=user_prompt, temperature=0.1)
+    raw_json = call_groq_json(system_prompt=SYSTEM_PROMPT, user_prompt=user_prompt, temperature=0.1, custom_api_key=custom_api_key)
 
     try:
         return MatchScoreResponse.model_validate(raw_json)

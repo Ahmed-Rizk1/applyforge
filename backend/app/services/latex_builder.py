@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Optional
 from app.models.profile import StructuredProfile
 from app.services.llm import call_groq_json
 from app.services.latex_compiler import escape_latex
@@ -54,7 +54,7 @@ def _load_latex_template() -> str:
         return f.read()
 
 
-def build_tailored_cv(profile: StructuredProfile, job_description: str) -> Tuple[str, str]:
+def build_tailored_cv(profile: StructuredProfile, job_description: str, custom_api_key: Optional[str] = None) -> Tuple[str, str]:
     """
     Tailor profile using LLM, then build:
     1. tex_source string
@@ -68,7 +68,7 @@ def build_tailored_cv(profile: StructuredProfile, job_description: str) -> Tuple
 
     # 1. Call LLM for tailored content
     try:
-        tailored_data = call_groq_json(system_prompt=TAILOR_PROMPT_SYSTEM, user_prompt=user_prompt, temperature=0.2)
+        tailored_data = call_groq_json(system_prompt=TAILOR_PROMPT_SYSTEM, user_prompt=user_prompt, temperature=0.2, custom_api_key=custom_api_key)
     except Exception as exc:
         logger.warning(f"Tailoring failed, falling back to raw profile: {exc}")
         tailored_data = {}

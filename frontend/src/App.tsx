@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { DragEvent, ChangeEvent } from 'react'
 import './App.css'
 import { ProfileEditor } from './components/ProfileEditor'
 import type { StructuredProfile } from './components/ProfileEditor'
 import { MatchScoreView } from './components/MatchScoreView'
 import { ChatbotView } from './components/ChatbotView'
+import { ApiKeyModal } from './components/ApiKeyModal'
 
 type UploadStatus = 'idle' | 'uploading' | 'error'
 type ParseStatus = 'idle' | 'parsing' | 'error'
@@ -35,6 +36,40 @@ function App() {
   const [isProfileConfirmed, setIsProfileConfirmed] = useState(false)
   const [jobDescription, setJobDescription] = useState<string>('')
   const [activeStepOverride, setActiveStepOverride] = useState<number | null>(null)
+
+  // API Key State
+  const [customApiKey, setCustomApiKey] = useState<string>(() => localStorage.getItem('applyforge_groq_key') || '')
+  const [isKeyModalOpen, setIsKeyModalOpen] = useState(false)
+
+  // Attach X-Groq-Api-Key to all fetch requests automatically
+  useEffect(() => {
+    const originalFetch = window.fetch
+    window.fetch = async (input, init) => {
+      const savedKey = localStorage.getItem('applyforge_groq_key')
+      if (savedKey && savedKey.trim()) {
+        init = init || {}
+        const headers = new Headers(init.headers || {})
+        if (!headers.has('X-Groq-Api-Key')) {
+          headers.set('X-Groq-Api-Key', savedKey.trim())
+        }
+        init.headers = headers
+      }
+      return originalFetch(input, init)
+    }
+    return () => {
+      window.fetch = originalFetch
+    }
+  }, [])
+
+  function handleSaveApiKey(key: string) {
+    const trimmed = key.trim()
+    setCustomApiKey(trimmed)
+    if (trimmed) {
+      localStorage.setItem('applyforge_groq_key', trimmed)
+    } else {
+      localStorage.removeItem('applyforge_groq_key')
+    }
+  }
 
   // PDF Upload handler
   async function handleUpload(file: File) {
@@ -184,6 +219,20 @@ function App() {
         </nav>
 
         <div className="sidebar-footer">
+          <button
+            type="button"
+            className="btn btn--ghost btn--small style-top-gap-xs"
+            onClick={() => setIsKeyModalOpen(true)}
+            style={{ width: '100%', justifyContent: 'space-between', marginBottom: '0.85rem' }}
+          >
+            <span>🔑 API Key</span>
+            {customApiKey ? (
+              <span className="key-status-badge key-status-badge--configured">✓ Configured</span>
+            ) : (
+              <span className="key-status-badge key-status-badge--needed">⚙️ Setup</span>
+            )}
+          </button>
+
           <p className="sidebar-note">
             No account required.
             <br />
@@ -409,6 +458,13 @@ function App() {
           </div>
         )}
       </main>
+
+      <ApiKeyModal
+        isOpen={isKeyModalOpen}
+        onClose={() => setIsKeyModalOpen(false)}
+        currentKey={customApiKey}
+        onSaveKey={handleSaveApiKey}
+      />
     </div>
   )
 }

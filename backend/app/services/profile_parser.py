@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from pydantic import ValidationError
 from app.models.profile import StructuredProfile, ContactInfo, WorkExperience, Education, Project
 from app.prompts.profile_extraction import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
@@ -23,11 +23,11 @@ def _sanitize_dict(data: Any) -> Any:
     return data
 
 
-def parse_raw_text_to_profile(raw_text: str) -> StructuredProfile:
+def parse_raw_text_to_profile(raw_text: str, custom_api_key: Optional[str] = None) -> StructuredProfile:
     """Send raw CV text to Groq LLM and return a validated Pydantic StructuredProfile."""
     user_prompt = USER_PROMPT_TEMPLATE.format(raw_text=raw_text)
     
-    raw_json = call_groq_json(system_prompt=SYSTEM_PROMPT, user_prompt=user_prompt, temperature=0.1)
+    raw_json = call_groq_json(system_prompt=SYSTEM_PROMPT, user_prompt=user_prompt, temperature=0.1, custom_api_key=custom_api_key)
     
     # Pre-sanitize json dictionary
     json_data = _sanitize_dict(raw_json)

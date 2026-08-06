@@ -7,9 +7,18 @@
 
 ## Current Status
 
-**✅ Stage 7 — UI Polish, Responsive Design & Full UX Pass** — COMPLETED
+**🎉 ALL STAGES COMPLETED (MVP SHIP-READY)**
 
-**Next Stage:** **Stage 8 — Deployment Config, Hardening & Launch Prep**
+- **✅ Stage 0 — Scaffolding & Dev Environment**
+- **✅ Stage 1 — PDF Upload + Raw Text Extraction**
+- **✅ Stage 2 — Structured Profile Extraction**
+- **✅ Stage 3 — Job Description Input + Match Score**
+- **✅ Stage 4 — Text-Only Generation Features**
+- **✅ Stage 5 — LaTeX Template + Tailored CV**
+- **✅ Stage 6 — Salary Estimate with Web Search + Cover Letter PDF**
+- **✅ Feature — Form Q&A Chatbot Copilot**
+- **✅ Stage 7 — UI Polish, Responsive Design & Full UX Pass**
+- **✅ Stage 8 — Deployment Config, Hardening & Launch Prep**
 
 ---
 
@@ -28,6 +37,9 @@
 | 6+| Application Form Chatbot | `POST /api/generate/chat`, `chat_copilot.py` service & prompt, `ChatbotView.tsx` with Detail Level (Concise, Standard, Detailed) & Tone Mode (Professional, Conversational, Enthusiastic & Persuasive, Bold & Impact, STAR Storyteller) controls, multi-turn history, copy buttons & quick prompt chips | 2026-08-06 | ✅ Verified: Python models & service imports OK, TS build clean (`tsc --noEmit` 0 errors) |
 | 7 | UI Polish, Responsive Design & Full UX Pass | Added `📋 Copy LaTeX Code` button to `TailoredCvView.tsx`, integrated Google Fonts (`Plus Jakarta Sans` & `Inter`), added full SEO & Open Graph meta tags to `index.html`, implemented mobile responsive CSS breakpoints (`@media (max-width: 840px)`), and verified production build | 2026-08-06 | ✅ Verified: `npm run build` succeeded cleanly (242 kB JS chunk, 23 kB CSS) |
 | 7+| Dedicated Step 4 Chatbot Page | Configured `04 Form Chatbot` as its own full-page dedicated screen in `App.tsx`, with clickable sidebar step navigation between `03 Paste JD` and `04 Form Chatbot`, sharing profile & JD context seamlessly | 2026-08-06 | ✅ Verified: `npm run build` succeeded in 368ms |
+| 8 | Deployment Config, Hardening & Launch Prep | Multi-stage Dockerfile, `frontend/Dockerfile` & `nginx.conf`, root `docker-compose.yml`, `vercel.json` rewrite config, `render.yaml` deployment config, CORS & rate limit security hardening, full root `README.md` update | 2026-08-06 | ✅ Verified: Docker compose setup, Vercel & Render configs created, README complete |
+| 8+| Groq API Key Setup & BYOK Validation | `POST /api/validate-key` endpoint, `ApiKeyModal.tsx` component with live validation & 1-click console link, secure browser `localStorage` key handling, `X-Groq-Api-Key` header injection via `fetch` interceptor, server `.env` fallback | 2026-08-06 | ✅ Verified: `npm run build` succeeded cleanly in 369ms |
+
 
 
 

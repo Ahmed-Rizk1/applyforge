@@ -6,6 +6,7 @@ from app.middleware.rate_limit import RateLimitMiddleware
 from app.routes.upload import router as upload_router
 from app.routes.profile import router as profile_router
 from app.routes.generate import router as generate_router
+from app.routes.validate_key import router as validate_key_router
 
 app = FastAPI(
     title="ApplyForge API",
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(upload_router, prefix="/api")
 app.include_router(profile_router, prefix="/api")
 app.include_router(generate_router, prefix="/api")
+app.include_router(validate_key_router, prefix="/api")
 
 
 @app.get("/api/health")

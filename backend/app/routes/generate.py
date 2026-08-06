@@ -1,5 +1,6 @@
 import logging
-from fastapi import APIRouter, HTTPException, Response
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Response, Header
 from app.models.generate import (
     GenerateRequest,
     MatchScoreResponse,
@@ -39,11 +40,14 @@ def _validate_payload(payload: GenerateRequest):
 
 
 @router.post("/generate/match-score", response_model=MatchScoreResponse)
-def get_match_score(payload: GenerateRequest):
+def get_match_score(
+    payload: GenerateRequest,
+    x_groq_api_key: Optional[str] = Header(None, alias="X-Groq-Api-Key")
+):
     """Analyze structured profile against a job description and return match score metrics."""
     _validate_payload(payload)
     try:
-        return generate_match_score(payload.profile, payload.job_description)
+        return generate_match_score(payload.profile, payload.job_description, custom_api_key=x_groq_api_key)
     except HTTPException:
         raise
     except Exception as exc:
@@ -55,11 +59,14 @@ def get_match_score(payload: GenerateRequest):
 
 
 @router.post("/generate/cover-letter", response_model=TextContentResponse)
-def get_cover_letter(payload: GenerateRequest):
+def get_cover_letter(
+    payload: GenerateRequest,
+    x_groq_api_key: Optional[str] = Header(None, alias="X-Groq-Api-Key")
+):
     """Generate a tailored cover letter based on candidate profile and job description."""
     _validate_payload(payload)
     try:
-        return generate_cover_letter(payload.profile, payload.job_description)
+        return generate_cover_letter(payload.profile, payload.job_description, custom_api_key=x_groq_api_key)
     except HTTPException:
         raise
     except Exception as exc:
@@ -71,11 +78,14 @@ def get_cover_letter(payload: GenerateRequest):
 
 
 @router.post("/generate/outreach-email", response_model=TextContentResponse)
-def get_outreach_email(payload: GenerateRequest):
+def get_outreach_email(
+    payload: GenerateRequest,
+    x_groq_api_key: Optional[str] = Header(None, alias="X-Groq-Api-Key")
+):
     """Generate a high-converting cold outreach email."""
     _validate_payload(payload)
     try:
-        return generate_outreach_email(payload.profile, payload.job_description)
+        return generate_outreach_email(payload.profile, payload.job_description, custom_api_key=x_groq_api_key)
     except HTTPException:
         raise
     except Exception as exc:
@@ -87,11 +97,14 @@ def get_outreach_email(payload: GenerateRequest):
 
 
 @router.post("/generate/linkedin-dm", response_model=TextContentResponse)
-def get_linkedin_dm(payload: GenerateRequest):
+def get_linkedin_dm(
+    payload: GenerateRequest,
+    x_groq_api_key: Optional[str] = Header(None, alias="X-Groq-Api-Key")
+):
     """Generate a personalized LinkedIn direct message with optional recruiter context."""
     _validate_payload(payload)
     try:
-        return generate_linkedin_dm(payload.profile, payload.job_description, payload.extras)
+        return generate_linkedin_dm(payload.profile, payload.job_description, payload.extras, custom_api_key=x_groq_api_key)
     except HTTPException:
         raise
     except Exception as exc:
@@ -103,11 +116,14 @@ def get_linkedin_dm(payload: GenerateRequest):
 
 
 @router.post("/generate/interview-questions", response_model=InterviewQuestionsResponse)
-def get_interview_questions(payload: GenerateRequest):
+def get_interview_questions(
+    payload: GenerateRequest,
+    x_groq_api_key: Optional[str] = Header(None, alias="X-Groq-Api-Key")
+):
     """Generate expected tailored interview questions and tips/reasoning."""
     _validate_payload(payload)
     try:
-        return generate_interview_questions(payload.profile, payload.job_description)
+        return generate_interview_questions(payload.profile, payload.job_description, custom_api_key=x_groq_api_key)
     except HTTPException:
         raise
     except Exception as exc:
@@ -119,11 +135,14 @@ def get_interview_questions(payload: GenerateRequest):
 
 
 @router.post("/generate/tailored-cv", response_model=TailoredCvResponse)
-def get_tailored_cv(payload: GenerateRequest):
+def get_tailored_cv(
+    payload: GenerateRequest,
+    x_groq_api_key: Optional[str] = Header(None, alias="X-Groq-Api-Key")
+):
     """Generate LaTeX source code and parallel HTML preview for a tailored CV."""
     _validate_payload(payload)
     try:
-        tex_source, html_preview = build_tailored_cv(payload.profile, payload.job_description)
+        tex_source, html_preview = build_tailored_cv(payload.profile, payload.job_description, custom_api_key=x_groq_api_key)
         return TailoredCvResponse(html_preview=html_preview, tex_source=tex_source)
     except HTTPException:
         raise
@@ -156,11 +175,14 @@ def compile_pdf(payload: CompilePdfRequest):
 
 
 @router.post("/generate/salary-estimate", response_model=SalaryEstimateResponse)
-def get_salary_estimate(payload: GenerateRequest):
+def get_salary_estimate(
+    payload: GenerateRequest,
+    x_groq_api_key: Optional[str] = Header(None, alias="X-Groq-Api-Key")
+):
     """Estimate annual market salary range using Tavily web search and Groq LLM synthesis."""
     _validate_payload(payload)
     try:
-        return generate_salary_estimate(payload.profile, payload.job_description)
+        return generate_salary_estimate(payload.profile, payload.job_description, custom_api_key=x_groq_api_key)
     except HTTPException:
         raise
     except Exception as exc:
@@ -192,7 +214,10 @@ def get_cover_letter_pdf(payload: CoverLetterPdfRequest):
 
 
 @router.post("/generate/chat", response_model=ChatResponse)
-def chat_copilot(payload: ChatRequest):
+def chat_copilot(
+    payload: ChatRequest,
+    x_groq_api_key: Optional[str] = Header(None, alias="X-Groq-Api-Key")
+):
     """Interactive multi-turn chatbot response grounded in candidate profile and job description."""
     if not payload.messages:
         raise HTTPException(
@@ -200,7 +225,7 @@ def chat_copilot(payload: ChatRequest):
             detail="Chat history cannot be empty."
         )
     try:
-        return generate_chat_reply(payload)
+        return generate_chat_reply(payload, custom_api_key=x_groq_api_key)
     except HTTPException:
         raise
     except Exception as exc:
@@ -209,4 +234,3 @@ def chat_copilot(payload: ChatRequest):
             status_code=500,
             detail=f"Chatbot failed: {str(exc)}"
         ) from exc
-

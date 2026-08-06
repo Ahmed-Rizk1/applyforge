@@ -35,7 +35,12 @@ def _extract_search_target(job_description: str, profile: StructuredProfile) -> 
     return title, location
 
 
-def generate_salary_estimate(profile: StructuredProfile, job_description: str) -> SalaryEstimateResponse:
+from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+
+def generate_salary_estimate(profile: StructuredProfile, job_description: str, custom_api_key: Optional[str] = None) -> SalaryEstimateResponse:
     """Extract job role & location from JD, fetch Tavily search grounding, and synthesize salary range via LLM."""
     profile_json_str = json.dumps(profile.model_dump(), ensure_ascii=False)
     
@@ -53,7 +58,7 @@ def generate_salary_estimate(profile: StructuredProfile, job_description: str) -
     )
 
     # Set temperature=0.0 for deterministic, non-fluctuating salary bounds
-    raw_json = call_groq_json(system_prompt=SYSTEM_PROMPT, user_prompt=user_prompt, temperature=0.0)
+    raw_json = call_groq_json(system_prompt=SYSTEM_PROMPT, user_prompt=user_prompt, temperature=0.0, custom_api_key=custom_api_key)
 
     # Attach search sources if LLM omitted them
     if not raw_json.get("sources") and search_results:

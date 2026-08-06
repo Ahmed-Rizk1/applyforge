@@ -22,7 +22,9 @@ def strip_markdown_form_artifacts(text: str) -> str:
     return text.strip()
 
 
-def generate_chat_reply(request: ChatRequest) -> ChatResponse:
+from typing import Optional
+
+def generate_chat_reply(request: ChatRequest, custom_api_key: Optional[str] = None) -> ChatResponse:
     system_prompt = build_chat_copilot_system_prompt(
         profile=request.profile,
         job_description=request.job_description,
@@ -38,7 +40,8 @@ def generate_chat_reply(request: ChatRequest) -> ChatResponse:
     reply_text = call_groq_chat(
         system_prompt=system_prompt,
         messages=formatted_messages,
-        temperature=0.4
+        temperature=0.4,
+        custom_api_key=custom_api_key
     )
 
     clean_reply = strip_markdown_form_artifacts(reply_text)

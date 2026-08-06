@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from app.models.profile import StructuredProfile
 from app.models.generate import TextContentResponse, InterviewQuestionsResponse
 from app.services.llm import call_groq_json
@@ -13,21 +13,21 @@ from app.prompts.interview_questions import SYSTEM_PROMPT as IQ_SYS, USER_PROMPT
 logger = logging.getLogger(__name__)
 
 
-def generate_cover_letter(profile: StructuredProfile, job_description: str) -> TextContentResponse:
+def generate_cover_letter(profile: StructuredProfile, job_description: str, custom_api_key: Optional[str] = None) -> TextContentResponse:
     profile_json_str = json.dumps(profile.model_dump(), ensure_ascii=False)
     user_prompt = CL_USER.format(profile_json=profile_json_str, job_description=job_description.strip())
-    raw_json = call_groq_json(system_prompt=CL_SYS, user_prompt=user_prompt, temperature=0.3)
+    raw_json = call_groq_json(system_prompt=CL_SYS, user_prompt=user_prompt, temperature=0.3, custom_api_key=custom_api_key)
     return TextContentResponse(content=str(raw_json.get("content", "")))
 
 
-def generate_outreach_email(profile: StructuredProfile, job_description: str) -> TextContentResponse:
+def generate_outreach_email(profile: StructuredProfile, job_description: str, custom_api_key: Optional[str] = None) -> TextContentResponse:
     profile_json_str = json.dumps(profile.model_dump(), ensure_ascii=False)
     user_prompt = EMAIL_USER.format(profile_json=profile_json_str, job_description=job_description.strip())
-    raw_json = call_groq_json(system_prompt=EMAIL_SYS, user_prompt=user_prompt, temperature=0.3)
+    raw_json = call_groq_json(system_prompt=EMAIL_SYS, user_prompt=user_prompt, temperature=0.3, custom_api_key=custom_api_key)
     return TextContentResponse(content=str(raw_json.get("content", "")))
 
 
-def generate_linkedin_dm(profile: StructuredProfile, job_description: str, extras: Dict[str, Any] = None) -> TextContentResponse:
+def generate_linkedin_dm(profile: StructuredProfile, job_description: str, extras: Dict[str, Any] = None, custom_api_key: Optional[str] = None) -> TextContentResponse:
     profile_json_str = json.dumps(profile.model_dump(), ensure_ascii=False)
     recruiter_context = ""
     if extras and isinstance(extras, dict):
@@ -39,12 +39,12 @@ def generate_linkedin_dm(profile: StructuredProfile, job_description: str, extra
         job_description=job_description.strip(),
         recruiter_context=context_str
     )
-    raw_json = call_groq_json(system_prompt=DM_SYS, user_prompt=user_prompt, temperature=0.3)
+    raw_json = call_groq_json(system_prompt=DM_SYS, user_prompt=user_prompt, temperature=0.3, custom_api_key=custom_api_key)
     return TextContentResponse(content=str(raw_json.get("content", "")))
 
 
-def generate_interview_questions(profile: StructuredProfile, job_description: str) -> InterviewQuestionsResponse:
+def generate_interview_questions(profile: StructuredProfile, job_description: str, custom_api_key: Optional[str] = None) -> InterviewQuestionsResponse:
     profile_json_str = json.dumps(profile.model_dump(), ensure_ascii=False)
     user_prompt = IQ_USER.format(profile_json=profile_json_str, job_description=job_description.strip())
-    raw_json = call_groq_json(system_prompt=IQ_SYS, user_prompt=user_prompt, temperature=0.3)
+    raw_json = call_groq_json(system_prompt=IQ_SYS, user_prompt=user_prompt, temperature=0.3, custom_api_key=custom_api_key)
     return InterviewQuestionsResponse.model_validate(raw_json)
